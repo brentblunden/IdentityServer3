@@ -18,6 +18,7 @@ using Owin;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
+using System.Web;
 using Thinktecture.IdentityServer.Core.Logging;
 
 namespace Thinktecture.IdentityServer.Core.Configuration
@@ -82,7 +83,38 @@ namespace Thinktecture.IdentityServer.Core.Configuration
         /// <value>
         /// Unique name of this server instance, e.g. https://myissuer.com
         /// </value>
-        public string IssuerUri { get; set; }
+        public string IssuerUri
+        {
+            get
+            {
+                Logger.Debug("[IssuerUri] Startup IssuerUri = '" + _issuerUri + "'");
+                if (string.IsNullOrEmpty(_issuerUri))
+                {
+                    var isSecure = HttpContext.Current.Request.IsSecureConnection;
+                    string discoveryIssuerUri = (isSecure) ? _issuerUriHttps : _issuerUriHttp;
+
+                    Logger.Debug("[IssuerUri] AbsoluteUri = " + HttpContext.Current.Request.Url.AbsoluteUri);
+                    Logger.Debug("[IssuerUri] UrlReferrer = " + HttpContext.Current.Request.UrlReferrer);
+                    Logger.Debug("[IssuerUri] Request.IsSecureConnection = " + isSecure);
+                    Logger.Debug("[IssuerUri] discoveryIssuerUri = " + discoveryIssuerUri);
+                    
+                    return discoveryIssuerUri;
+                }
+                else
+                {
+                    Logger.Debug("[IssuerUri] get non-empty_issuerUri = " + _issuerUri);
+                    return _issuerUri;
+                }
+            }
+            set
+            {
+                _issuerUri = value;
+                Logger.Debug("[IssuerUri] set _issuerUri = " + _issuerUri);
+            }
+        }
+        private string _issuerUri = string.Empty;
+        public static string _issuerUriHttps;
+        public static string _issuerUriHttp;
 
         /// <summary>
         /// Gets or sets the X.509 certificate (and corresponding private key) for signing security tokens.
