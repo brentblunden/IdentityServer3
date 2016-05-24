@@ -90,6 +90,9 @@ namespace Thinktecture.IdentityServer.Core.Configuration
                 Logger.Debug("[IssuerUri] Startup IssuerUri = '" + _issuerUri + "'");
                 if (string.IsNullOrEmpty(_issuerUri))
                 {
+                    if (string.IsNullOrEmpty(_issuerUriHttps) || (string.IsNullOrEmpty(_issuerUriHttps)))
+                        return _issuerUri;
+
                     var isSecure = HttpContext.Current.Request.IsSecureConnection;
                     string discoveryIssuerUri = (isSecure) ? _issuerUriHttps : _issuerUriHttp;
 
