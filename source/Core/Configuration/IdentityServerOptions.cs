@@ -87,6 +87,7 @@ namespace Thinktecture.IdentityServer.Core.Configuration
         {
             get
             {
+                Logger.Debug("[IssuerUri] Thinktecture.IdentityServer3.1.6.2.FujiFilmEditV1.0");
                 Logger.Debug("[IssuerUri] Startup IssuerUri = '" + _issuerUri + "'");
                 if (string.IsNullOrEmpty(_issuerUri))
                 {
