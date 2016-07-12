@@ -91,11 +91,20 @@ namespace Thinktecture.IdentityServer.Core.Configuration
                 Logger.Debug("[IssuerUri] Startup IssuerUri = '" + _issuerUri + "'");
                 if (string.IsNullOrEmpty(_issuerUri))
                 {
-                    if (string.IsNullOrEmpty(_issuerUriHttps) || (string.IsNullOrEmpty(_issuerUriHttp)))
-                        return _issuerUri;
-
+                    var discoveryIssuerUri = string.Empty;
                     var isSecure = HttpContext.Current.Request.IsSecureConnection;
-                    string discoveryIssuerUri = (isSecure) ? _issuerUriHttps : _issuerUriHttp;
+
+                    // return discovery values only if available and matching scheme is requested
+                    if ((isSecure && !string.IsNullOrEmpty(_issuerUriHttps)) || (!isSecure && !string.IsNullOrEmpty(_issuerUriHttp)))
+                    {
+                        discoveryIssuerUri = (isSecure) ? _issuerUriHttps : _issuerUriHttp;
+                    }
+                    // otherwise return set (or default) value
+                    else
+                    {
+                        Logger.Debug("[IssuerUri] Discovery issuer uris not set so return _issuerUri =  " + _issuerUri);
+                        return _issuerUri;
+                    }
 
                     Logger.Debug("[IssuerUri] AbsoluteUri = " + HttpContext.Current.Request.Url.AbsoluteUri);
                     Logger.Debug("[IssuerUri] UrlReferrer = " + HttpContext.Current.Request.UrlReferrer);
