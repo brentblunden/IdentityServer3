@@ -94,10 +94,28 @@ namespace Thinktecture.IdentityServer.Core.Configuration
                     var discoveryIssuerUri = string.Empty;
                     var isSecure = HttpContext.Current.Request.IsSecureConnection;
 
+                    Logger.Debug("[IssuerUri] AbsoluteUri = " + HttpContext.Current.Request.Url.AbsoluteUri);
+                    Logger.Debug("[IssuerUri] UrlReferrer = " + HttpContext.Current.Request.UrlReferrer);
+                    Logger.Debug("[IssuerUri] Request.IsSecureConnection = " + isSecure);
+
                     // return discovery values only if available and matching scheme is requested
                     if ((isSecure && !string.IsNullOrEmpty(_issuerUriHttps)) || (!isSecure && !string.IsNullOrEmpty(_issuerUriHttp)))
                     {
                         discoveryIssuerUri = (isSecure) ? _issuerUriHttps : _issuerUriHttp;
+                        Logger.Debug("[IssuerUri] discoveryIssuerUri followed scheme = True");
+                    }
+                    // return https discovery value if its the only one available.  handles the case of a http back-channel request
+                    // causing isSecure flag to validate to false when an https address is available, and http is not 
+                    else if (!string.IsNullOrEmpty(_issuerUriHttps) && (string.IsNullOrEmpty(_issuerUriHttp)))
+                    {
+                        discoveryIssuerUri = _issuerUriHttps;
+                        Logger.Debug("[IssuerUri] built-in service is only available as https = True");
+                    }
+                    // return http discovery value if its the only one available.
+                    else if (string.IsNullOrEmpty(_issuerUriHttps) && (!string.IsNullOrEmpty(_issuerUriHttp)))
+                    {
+                        discoveryIssuerUri = _issuerUriHttp;
+                        Logger.Debug("[IssuerUri] built-in service is only available as http = True");
                     }
                     // otherwise return set (or default) value
                     else
@@ -106,9 +124,6 @@ namespace Thinktecture.IdentityServer.Core.Configuration
                         return _issuerUri;
                     }
 
-                    Logger.Debug("[IssuerUri] AbsoluteUri = " + HttpContext.Current.Request.Url.AbsoluteUri);
-                    Logger.Debug("[IssuerUri] UrlReferrer = " + HttpContext.Current.Request.UrlReferrer);
-                    Logger.Debug("[IssuerUri] Request.IsSecureConnection = " + isSecure);
                     Logger.Debug("[IssuerUri] discoveryIssuerUri = " + discoveryIssuerUri);
                     
                     return discoveryIssuerUri;
