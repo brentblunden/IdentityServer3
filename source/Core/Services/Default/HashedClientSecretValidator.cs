@@ -53,9 +53,9 @@ namespace Thinktecture.IdentityServer.Core.Services.Default
                 catch (FormatException)
                 {
                     // todo: logging
-                    throw new InvalidOperationException("Invalid hashing algorithm for client secret.");
+                    throw new InvalidOperationException("Invalid hashing algorithm for client secret. Could not convert from Base 64 string: " + clientSecret.Value);
                 }
-                
+
                 if (clientSecretBytes.Length == 32)
                 {
                     isValid = ObfuscatingComparer.IsEqual(clientSecret.Value, secretSha256);
@@ -67,7 +67,7 @@ namespace Thinktecture.IdentityServer.Core.Services.Default
                 else
                 {
                     // todo: logging
-                    throw new InvalidOperationException("Invalid hashing algorithm for client secret.");
+                    throw new InvalidOperationException("Invalid hashing algorithm for client secret. Invalid byte length: " + clientSecretBytes.Length.ToString());
                 }
 
                 if (isValid)
